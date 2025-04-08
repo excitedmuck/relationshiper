@@ -1,7 +1,7 @@
-# Relationship Game Theory App with Short-term vs Long-term Toggle, Decision Trees, and Dynamic Power Balance
-
+# Relationship Game Theory App with Improved Visualizations
 import streamlit as st
 import math
+import plotly.graph_objects as go  # For the gauge chart
 
 st.set_page_config(page_title="Relationship Game Theory Tool", layout="wide")
 
@@ -23,8 +23,6 @@ Power in relationships is the asymmetry in decision-making influence, emotional 
 Based on **evolutionary psychology** and **strategic game theory**:
 - **Short-term relationships** often prioritize age, attractiveness, and immediate compatibility.
 - **Long-term relationships** depend more on shared values, emotional stability, adaptability, and strategic synergy over time.
-
-Inspired by thinkers like **Robert Trivers** (reciprocal altruism), **John Nash** (equilibrium theory), and **Robert Axelrod** (cooperation in repeated games).
 """)
 
 # ------------------------ INPUTS --------------------------
@@ -76,11 +74,48 @@ compatibility = round((your_score + partner_score) / 2, 2)
 power_balance = round(abs(your_score - partner_score), 2)
 dominant = "Equal" if power_balance < 3 else ("You" if your_score > partner_score else "Partner")
 
-# ------------------------ OUTPUT --------------------------
+# ------------------------ VISUALIZATION --------------------------
 st.header("📊 Compatibility & Power Dynamics")
-st.metric("❤️ Compatibility Score", compatibility)
-st.metric("⚖️ Power Balance", power_balance)
-st.metric("🧠 Dominant Partner", dominant)
+
+# Create a container for the top metrics
+metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
+
+with metrics_col1:
+    # Compatibility Gauge
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = compatibility,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Compatibility Score", 'font': {'size': 18}},
+        gauge = {
+            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+            'bar': {'color': "darkviolet"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+                {'range': [0, 40], 'color': "lightcoral"},
+                {'range': [40, 70], 'color': "lightgoldenrodyellow"},
+                {'range': [70, 100], 'color': "lightgreen"}],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': compatibility}
+        }
+    ))
+    fig.update_layout(
+        height=300,
+        margin=dict(l=20, r=20, t=50, b=10)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with metrics_col2:
+    st.metric("⚖️ Power Balance", power_balance, 
+             help="Difference between partner scores (lower = more balanced)")
+
+with metrics_col3:
+    st.metric("🧠 Dominant Partner", dominant, 
+             help="Who has more influence in the relationship dynamics")
 
 # ------------------------ DECISION TREE -------------------
 st.header("🌿 Future Scenarios")
@@ -102,16 +137,8 @@ future_score_partner = sum([v[1] for v in scenarios.values()])
 st.metric("📈 Your Long-Term Outcome Score", future_score_you)
 st.metric("📈 Partner's Long-Term Outcome Score", future_score_partner)
 
-
-st.markdown("👉 Want to understand how these inputs work? Visit the **Model Inputs Explained** page from the sidebar.")
-
 # ------------------------ NOTE ----------------------------
 st.info("""
-This tool is an evolving experiment in applying **rational choice theory**, **affective computing**, and **relational psychology** to romantic decision-making.
-
-Next version will include:
-- Attachment styles
-- Conflict resolution modeling
-- Nash Equilibrium visualizer
-- Repeated interaction scenarios
+💡 **About This Tool**: This is an evolving experiment in applying rational choice theory, affective computing, and relational psychology to romantic decision-making. 
+The visualizations help make complex relationship dynamics more intuitive.
 """)
